@@ -1,0 +1,262 @@
+# AI Engineer Course - Day 1 Setup Guide (Windows)
+
+========================================
+PREREQUISITES
+=============
+
+Install the following software before starting the course:
+
+* Python 3.11
+* Visual Studio Code
+* Git
+* UV Package Manager
+* Windows Terminal
+* GitHub Account
+* Groq API Key
+* Gemini API Key
+* OpenRouter API Key
+* Qdrant Cloud Account
+
+========================================
+
+1. INSTALL PYTHON 3.11
+   ========================================
+
+Download:
+https://www.python.org/downloads/release/python-3119/
+
+Steps:
+
+1. Download **Windows Installer (64-bit)**.
+2. Run the installer.
+3. **Check "Add python.exe to PATH".**
+4. Click **Install Now**.
+
+Verify:
+
+python --version
+
+Expected Output:
+
+Python 3.11.9
+
+========================================
+2. INSTALL VISUAL STUDIO CODE
+=============================
+
+Download:
+https://code.visualstudio.com/download
+
+Steps:
+
+1. Install VS Code.
+2. On the "Additional Tasks" screen, enable all checkboxes.
+3. Install these extensions:
+
+   * Python (Microsoft)
+   * Pylance (Microsoft)
+   * Jupyter (Microsoft)
+
+========================================
+3. INSTALL GIT
+==============
+
+Download:
+https://git-scm.com/download/win
+
+Steps:
+
+1. Run the installer.
+2. Keep all default settings.
+3. Finish installation.
+
+Verify:
+
+git --version
+
+Configure Git:
+
+git config --global user.name "Your Name"
+git config --global user.email "[your@email.com](mailto:your@email.com)"
+
+========================================
+4. INSTALL UV PACKAGE MANAGER
+=============================
+
+Open PowerShell and run:
+
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+If PowerShell blocks the script:
+
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Close PowerShell and reopen it.
+
+Verify:
+
+uv --version
+
+========================================
+5. INSTALL WINDOWS TERMINAL
+===========================
+
+Steps:
+
+1. Open Microsoft Store.
+2. Search **Windows Terminal**.
+3. Install it.
+4. Pin it to the taskbar.
+
+========================================
+6. CREATE GITHUB ACCOUNT
+========================
+
+Website:
+https://github.com/signup
+
+Steps:
+
+1. Sign up.
+2. Choose a professional username.
+3. Verify your email.
+4. Select the Free plan.
+5. Add:
+
+   * Profile photo
+   * Bio
+   * Location
+
+========================================
+7. CREATE API KEYS
+==================
+
+## Groq
+
+https://console.groq.com
+
+* Sign in.
+* Open API Keys.
+* Create a key.
+* Save the key securely.
+
+## Gemini
+
+https://aistudio.google.com
+
+* Click "Get API Key".
+* Create a new project.
+* Generate and save the API key.
+
+## OpenRouter
+
+https://openrouter.ai
+
+* Sign in.
+* Open Profile → Keys.
+* Create a key.
+* Save it securely.
+
+========================================
+8. CREATE QDRANT CLOUD ACCOUNT
+==============================
+
+Website:
+https://cloud.qdrant.io
+
+Steps:
+
+1. Sign in.
+2. Create a Free Cluster.
+3. Region:
+   AWS Mumbai (ap-south-1)
+4. Wait until provisioning completes.
+5. Copy:
+
+   * Cluster URL
+   * API Key
+
+========================================
+9. CREATE PROJECT FOLDER
+========================
+
+Open Windows Terminal:
+
+cd C:\Users%USERNAME%
+
+mkdir padho-ai-engineer
+
+cd padho-ai-engineer
+
+========================================
+10. CREATE .env FILE
+====================
+
+Run:
+
+notepad .env
+
+Paste:
+
+GROQ_API_KEY=gsk_your_key_here
+GOOGLE_API_KEY=AIza_your_key_here
+OPENROUTER_API_KEY=sk-or-your_key_here
+QDRANT_URL=https://xxxxx.aws.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_key_here
+
+Save the file.
+
+IMPORTANT:
+Never upload the `.env` file to GitHub.
+
+========================================
+11. CREATE COURSE FOLDERS
+=========================
+
+Run:
+
+mkdir week1 week2 week3 week4 week5 week6 week7 week8
+
+Open in VS Code:
+
+code .
+
+========================================
+12. VERIFY INSTALLATION
+=======================
+
+Run the following commands:
+
+python --version
+
+uv --version
+
+git --version
+
+code --version
+
+All commands should display installed versions without errors.
+
+========================================
+COMMON ISSUES
+=============
+
+## Python not recognized
+
+Reinstall Python and make sure
+"Add python.exe to PATH" is checked.
+
+## uv command not found
+
+Close the terminal and open it again.
+
+## PowerShell blocks scripts
+
+Run:
+
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+## .env becomes .env.txt
+
+Enable file extensions in File Explorer and rename it to `.env`.
+
