@@ -50,4 +50,14 @@ Keeps project dependencies isolated from other Python projects.
 
 API keys should never be hardcoded.
 
-Use:
+
+### Commands Used:
+1. uv init day1
+2. uv venv --python 3.11
+3. .venv\Scripts\activate
+4. deactivate
+5. code hello_llm.py
+6. uv add groq python-dotenv
+7. python .\hello_llm.py
+
+---
