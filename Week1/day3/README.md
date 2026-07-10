@@ -116,8 +116,6 @@ The repository also includes handwritten notes covering:
 - Token Usage
 - Importance of Tokens in LLMs
 
-![Day 3 Notes](Day3-Notes.jpg)
-
 ---
 
 ## ✅ Outcome
