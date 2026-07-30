@@ -1,5 +1,3 @@
-Here is a professional, complete, and well-structured **`README.md`** file for your project repository.
-
 ---
 
 # 📚 Automated QA & Test-Prep Generator using RAG and LangChain
