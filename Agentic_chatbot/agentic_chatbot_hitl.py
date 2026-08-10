@@ -18,8 +18,9 @@ from langchain_groq import ChatGroq
 from langchain_tavily import TavilySearch
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 import streamlit as st
 
@@ -29,11 +30,18 @@ load_dotenv()
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.7)
 
 # ---------------- Embeddings (free, local) ----------------
+'''
 @st.cache_resource
 def get_embeddings_model():
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 embeddings = get_embeddings_model()
+'''
+
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="gemini-embedding-001"
+)
+
 
 
 def ingest_rag_document(file_path):
