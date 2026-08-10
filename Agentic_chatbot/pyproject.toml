@@ -19,6 +19,7 @@ dependencies = [
     "pypdf>=6.14.2",
     "python-dotenv>=1.2.2",
     "requests>=2.34.2",
+    "sentence-transformers>=5.7.0",
     "streamlit>=1.61.1",
     "tavily-python>=0.7.27",
 ]
