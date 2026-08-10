@@ -48,6 +48,8 @@ def ingest_rag_document(file_path):
 
 def get_retriever():
     DB_PATH = "faiss_db"
+    if not os.path.exists(DB_PATH):
+        return None
     vector_store = FAISS.load_local(
         folder_path=DB_PATH, embeddings=embeddings, allow_dangerous_deserialization=True
     )
@@ -58,6 +60,11 @@ def get_retriever():
 def rag_tool(query: str) -> str:
     """Retrieve relevant information from the PDF document."""
     retriever = get_retriever()
+    if retriever is None:
+        return (
+            "No PDF document has been indexed yet. "
+            "Please upload a PDF first."
+        )
     documents = retriever.invoke(query)
     if not documents:
         return "No relevant information was found in the PDF."

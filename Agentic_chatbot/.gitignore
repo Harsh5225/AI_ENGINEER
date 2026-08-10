@@ -1,4 +1,11 @@
 .env
+
+.venv/
 __pycache__/
 *.pyc
-.vscode/
+
+chatbot.db
+
+uploaded_docs/
+
+*.log
