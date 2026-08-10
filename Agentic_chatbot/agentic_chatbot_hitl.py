@@ -48,7 +48,7 @@ def ingest_rag_document(file_path):
 
 def get_retriever():
     DB_PATH = "faiss_db"
-    if not os.path.exists(DB_PATH):
+    if not os.path.exists(DB_PATH): 
         return None
     vector_store = FAISS.load_local(
         folder_path=DB_PATH, embeddings=embeddings, allow_dangerous_deserialization=True
