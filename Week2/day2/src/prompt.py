@@ -7,7 +7,7 @@ You do this by asking questions about the text below:
 {text}
 ------------
 
-Create questions that will prepare the coders or programmers
+Create only 5 questions that will prepare the coders or programmers
 Make sure not to lose any important information.
 
 QUESTIONS:
@@ -24,7 +24,7 @@ We have the option to refine the existing questions or add new ones
 {text}
 ----------
 
-Given the new context, refine the original questions in English.
+Given the new context, refine the original questions in English and do it fastly.
 If the context is not helpful, please provide the original questions.
 QUESTIONS:
 """

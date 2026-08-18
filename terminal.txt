@@ -1,0 +1,6 @@
+uv init
+uv venv --python 3.11
+.venv\Scripts\activate
+uv add langchain
+uv add langchain-groq
+uv add python-dotenv

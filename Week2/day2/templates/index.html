@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Question Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c232c;
+    --border: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #f0b429;
+    --accent-dim: #6b5416;
+    --good: #3fb950;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 32px 40px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 28px;
+    margin: 6px 0 4px;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 24px;
+    background: var(--accent);
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .subtitle { color: var(--muted); font-size: 15px; }
+
+  main {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 110px);
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .left {
+    border-right: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  .right {
+    padding: 28px 40px;
+  }
+
+  .dropzone {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: var(--surface);
+  }
+
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .dropzone p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+  .dropzone .icon { font-size: 28px; }
+
+  #file-input { display: none; }
+
+  .filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 14px;
+    word-break: break-all;
+  }
+
+  button.primary {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--accent);
+    color: #1a1300;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  button.primary:disabled {
+    background: var(--surface-2);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  button.primary:not(:disabled):hover { opacity: 0.9; }
+
+  .pdf-preview {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    height: 420px;
+  }
+
+  .pdf-preview iframe { width: 100%; height: 100%; border: none; }
+
+  .status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 14px;
+    min-height: 18px;
+  }
+
+  .empty-state {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding-top: 60px;
+    text-align: center;
+  }
+
+  .qa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .qa-header h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    margin: 0;
+  }
+
+  a.download-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--good);
+    text-decoration: none;
+    border: 1px solid var(--good);
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+
+  a.download-link:hover { background: rgba(63, 185, 80, 0.1); }
+
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .qa-question {
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .qa-question .tag {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .qa-question .text { font-size: 15px; font-weight: 500; }
+
+  .qa-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease;
+    border-top: 1px solid transparent;
+  }
+
+  .qa-answer.open {
+    max-height: 600px;
+    border-top: 1px solid var(--border);
+  }
+
+  .qa-answer .inner {
+    padding: 16px 18px 18px 48px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .qa-answer .inner:before {
+    content: "// answer";
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--good);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 10px;
+    height: 56px;
+    margin-bottom: 12px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">// pdf-to-prep pipeline</div>
+  <h1>Interview Question Creator<span class="cursor"></span></h1>
+  <div class="subtitle">Upload a document. Get a set of interview-ready questions, answered from the source.</div>
+</header>
+
+<main>
+  <div class="left">
+    <div class="dropzone" id="dropzone">
+      <div class="icon">↑</div>
+      <p><strong>Click to upload</strong> or drag a PDF here</p>
+    </div>
+    <input type="file" id="file-input" accept="application/pdf">
+    <div class="filename" id="filename"></div>
+
+    <button class="primary" id="generate-btn" disabled>Generate questions</button>
+    <div class="status" id="status"></div>
+
+    <div class="pdf-preview" id="pdf-preview" style="display:none;">
+      <iframe id="pdf-frame"></iframe>
+    </div>
+  </div>
+
+  <div class="right">
+    <div id="empty" class="empty-state">Upload a PDF on the left to begin.<br>Ten questions, answered straight from your document.</div>
+
+    <div id="results" style="display:none;">
+      <div class="qa-header">
+        <h2 id="qa-count"></h2>
+        <a class="download-link" id="download-link" href="#" download>↓ Download CSV</a>
+      </div>
+      <div id="qa-list"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('file-input');
+  const filenameEl = document.getElementById('filename');
+  const generateBtn = document.getElementById('generate-btn');
+  const statusEl = document.getElementById('status');
+  const pdfPreview = document.getElementById('pdf-preview');
+  const pdfFrame = document.getElementById('pdf-frame');
+  const emptyEl = document.getElementById('empty');
+  const resultsEl = document.getElementById('results');
+  const qaList = document.getElementById('qa-list');
+  const qaCount = document.getElementById('qa-count');
+  const downloadLink = document.getElementById('download-link');
+
+  let selectedFile = null;
+  let uploadedPath = null;
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    if (file.type !== 'application/pdf') {
+      statusEl.textContent = 'Please choose a PDF file.';
+      return;
+    }
+    selectedFile = file;
+    filenameEl.textContent = file.name;
+    generateBtn.disabled = false;
+    statusEl.textContent = '';
+  }
+
+  generateBtn.addEventListener('click', async () => {
+    if (!selectedFile) return;
+
+    generateBtn.disabled = true;
+    statusEl.textContent = 'Uploading document...';
+
+    const formData = new FormData();
+    formData.append('pdf_file', selectedFile);
+
+    const uploadRes = await fetch('/upload', { method: 'POST', body: formData });
+    const uploadData = await uploadRes.json();
+    uploadedPath = uploadData.pdf_filename;
+
+    pdfFrame.src = '/' + uploadedPath;
+    pdfPreview.style.display = 'block';
+
+    emptyEl.style.display = 'none';
+    resultsEl.style.display = 'block';
+    qaList.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      const sk = document.createElement('div');
+      sk.className = 'skeleton';
+      qaList.appendChild(sk);
+    }
+    qaCount.textContent = 'Generating questions...';
+    statusEl.textContent = 'Reading document, drafting questions, searching for answers. This can take a minute.';
+
+    const analyzeRes = await fetch('/analyze?pdf_filename=' + encodeURIComponent(uploadedPath), { method: 'POST' });
+    const analyzeData = await analyzeRes.json();
+
+    renderResults(analyzeData.qa_pairs, analyzeData.csv_path);
+    statusEl.textContent = 'Done.';
+    generateBtn.disabled = false;
+  });
+
+  function renderResults(pairs, csvPath) {
+    qaList.innerHTML = '';
+    qaCount.textContent = pairs.length + ' questions generated';
+    downloadLink.href = '/' + csvPath;
+
+    pairs.forEach((pair, idx) => {
+      const card = document.createElement('div');
+      card.className = 'qa-card';
+
+      const tagNum = String(idx + 1).padStart(2, '0');
+
+      card.innerHTML = `
+        <div class="qa-question">
+          <span class="tag">// Q${tagNum}</span>
+          <span class="text">${pair.question}</span>
+        </div>
+        <div class="qa-answer">
+          <div class="inner">${pair.answer}</div>
+        </div>
+      `;
+
+      const qEl = card.querySelector('.qa-question');
+      const aEl = card.querySelector('.qa-answer');
+      qEl.addEventListener('click', () => aEl.classList.toggle('open'));
+
+      qaList.appendChild(card);
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,5 +1,4 @@
 import os
-import re
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import PyPDFLoader
@@ -17,99 +16,98 @@ from src.prompt import prompt_template, refine_template
 load_dotenv()
 
 
-def get_llm():
-    """Initialize and return the Groq LLM."""
-    return ChatGroq(
-        model="llama-3.3-70b-versatile",
-        temperature=0.3,
-        api_key=os.getenv("GROQ_API_KEY"),
-    )
-
-
-def get_embeddings():
-    """Initialize and return the HuggingFace embedding model."""
-    return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-
-def load_pdf_text(file_path: str) -> str:
-    """Load a PDF and concatenate all page content into a single string."""
+def file_processing(file_path):
+    """
+    Loads a PDF and splits it into two different sets of chunks:
+    - document_ques_gen: large chunks, used to generate broad, well-rounded questions
+    - document_answer_gen: smaller chunks, used later to build the retriever
+      that answers each generated question accurately
+    """
+    # Load data from PDF
     loader = PyPDFLoader(file_path)
     data = loader.load()
 
-    full_text = ""
+    question_gen = ""
     for page in data:
-        full_text += page.page_content
+        question_gen += page.page_content
 
-    return full_text
-
-
-def split_text_for_question_gen(text: str) -> list[Document]:
-    """Split raw text into large chunks for question generation."""
-    splitter = TokenTextSplitter(
+    # Large chunks -> good for generating broad questions covering a full concept
+    splitter_ques_gen = TokenTextSplitter(
         model_name="gpt-3.5-turbo",
         chunk_size=10000,
-        chunk_overlap=200,
+        chunk_overlap=200
     )
-    chunks = splitter.split_text(text)
-    return [Document(page_content=chunk) for chunk in chunks]
+    chunks_ques_gen = splitter_ques_gen.split_text(question_gen)
+    document_ques_gen = [Document(page_content=t) for t in chunks_ques_gen]
 
-
-def split_documents_for_answer_gen(documents: list[Document]) -> list[Document]:
-    """Split question-gen documents further into smaller chunks for retrieval/answering."""
-    splitter = TokenTextSplitter(
+    # Smaller chunks -> better precision when retrieving context to answer a specific question
+    splitter_ans_gen = TokenTextSplitter(
         model_name="gpt-3.5-turbo",
         chunk_size=1000,
-        chunk_overlap=100,
+        chunk_overlap=100
     )
-    return splitter.split_documents(documents)
+    document_answer_gen = splitter_ans_gen.split_documents(document_ques_gen)
+
+    return document_ques_gen, document_answer_gen
 
 
-def build_vectorstore(documents: list[Document], embeddings) -> FAISS:
-    """Build a FAISS vector store from documents."""
-    return FAISS.from_documents(documents, embeddings)
+def llm_pipeline(file_path):
+    """
+    Full pipeline: process the file, generate ~10 interview questions,
+    build a retriever over the document, and return everything needed
+    to answer those questions on demand.
+    """
+    document_ques_gen, document_answer_gen = file_processing(file_path)
 
-
-def generate_questions(llm, documents: list[Document]) -> str:
-    """Run the refine-style summarization chain to generate interview questions."""
-    question_prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
-    refine_prompt = PromptTemplate(
-        template=refine_template, input_variables=["existing_answer", "text"]
+    # LLM used purely for question generation
+    llm_ques_gen_pipeline = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0.3,
+        api_key=os.getenv("GROQ_API_KEY")
     )
 
+    PROMPT_QUESTIONS = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+    REFINE_PROMPT_QUESTIONS = PromptTemplate(
+        input_variables=["existing_answer", "text"],
+        template=refine_template,
+    )
+
+    # "refine" chain type: generates questions from the first chunk, then
+    # progressively refines/extends them as it reads through the remaining chunks
     ques_gen_chain = load_summarize_chain(
-        llm=llm,
+        llm=llm_ques_gen_pipeline,
         chain_type="refine",
         verbose=True,
-        question_prompt=question_prompt,
-        refine_prompt=refine_prompt,
+        question_prompt=PROMPT_QUESTIONS,
+        refine_prompt=REFINE_PROMPT_QUESTIONS
     )
 
-    return ques_gen_chain.run(documents)
+    ques = ques_gen_chain.run(document_ques_gen)
 
+    # Embeddings + vector store for answering questions later
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    vector_store = FAISS.from_documents(document_answer_gen, embeddings)
 
-def parse_questions(raw_questions: str) -> list[str]:
-    """Extract a clean list of questions from the numbered raw text output."""
-    return re.findall(r"^\d+\.\s*(.*)", raw_questions, flags=re.MULTILINE)
+    # Separate LLM instance for answering (kept distinct from question-gen LLM
+    # in case you want different temperature/settings for each task)
+    llm_answer_gen = ChatGroq(
+        model="llama-3.3-70b-versatile",
+        temperature=0.1,
+        api_key=os.getenv("GROQ_API_KEY")
+    )
 
+    # Clean up the raw question text into a proper list
+    ques_list = ques.split("\n")
+    filtered_ques_list = [
+        q.strip() for q in ques_list
+        if q.strip().endswith('?') or q.strip().endswith('.')
+    ]
 
-def build_answer_chain(llm, vectorstore):
-    """Build the retrieval QA chain used to answer each generated question."""
-    return RetrievalQA.from_chain_type(
-        llm=llm,
+    answer_generation_chain = RetrievalQA.from_chain_type(
+        llm=llm_answer_gen,
         chain_type="stuff",
-        retriever=vectorstore.as_retriever(),
+        retriever=vector_store.as_retriever()
     )
 
-
-def generate_and_save_answers(answer_chain, questions: list[str], output_path: str = "answers.txt"):
-    """Loop through questions, generate answers, print + save them to file."""
-    for question in questions:
-        print("Question: ", question)
-        answer = answer_chain.run(question)
-        print("Answer: ", answer)
-        print("********")
-
-        with open(output_path, "a") as f:
-            f.write("Question: " + question + "\n")
-            f.write("Answer: " + answer + "\n")
-            f.write("********\n")
+    return answer_generation_chain, filtered_ques_list
